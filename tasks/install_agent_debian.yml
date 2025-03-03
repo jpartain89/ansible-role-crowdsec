@@ -1,18 +1,32 @@
-- name: Add crowdsec apt-key
-  ansible.builtin.apt_key:
-    url: https://packagecloud.io/crowdsec/crowdsec/gpgkey
+- name: Add crowdsec key and repo
+  ansible.builtin.deb822_repository:
+    name: crowdsec
+    types:
+      - deb
+      - deb-src
+    components: main
+    suites: any
+    uris: https://packagecloud.io/crowdsec/crowdsec/any
+    signed_by: https://packagecloud.io/crowdsec/crowdsec/gpgkey
     state: present
-
-# https://packagecloud.io/crowdsec/crowdsec/install#manual-deb
-- name: Add crowdsec apt repository
-  ansible.builtin.apt_repository:
-    repo: deb https://packagecloud.io/crowdsec/crowdsec/{{ ansible_distribution | lower }}/ {{ ansible_distribution_release }} main
-    state: present
-    filename: crowdsec
-    update_cache: true
+    enabled: true
 
 - name: Install crowdsec
   ansible.builtin.apt:
-    name: crowdsec
+    name: "{{ item }}"
     state: present
     update_cache: true
+  with_items:
+    - crowdsec
+    - crowdsec-firewall-bouncer-iptables
+    - crowdsec-cloudflare-bouncer
+
+#- name: register remediation components
+#  ansible.builtin.command:
+#    cmd: sudo cscli bouncers add crowdsec-firewall-bouncer-iptables
+#  register: _crowdsec-firewall-bouncer-iptables_api_key
+
+
+- name: Configure Cloudflare bouncer
+  ansible.builtin.command:
+    cmd: sudo crowdsec-cloudflare-bouncer -g {{ crowdesc_CF_TOKEN }} -o /etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml

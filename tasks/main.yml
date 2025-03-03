@@ -25,14 +25,14 @@
   tags:
     - console
 
-- name: Install bouncers (Debian)
-  ansible.builtin.include_tasks: install_bouncers_debian.yml
-  loop: "{{ cs_bouncers | dict2items }}"
-  loop_control:
-    loop_var: cs_bouncer
-  when: cs_bouncers is defined and ansible_os_family == 'Debian'
-  tags:
-    - bouncers
+# - name: Install bouncers (Debian)
+#   ansible.builtin.include_tasks: install_bouncers_debian.yml
+#   loop: "{{ cs_bouncers | dict2items }}"
+#   loop_control:
+#     loop_var: cs_bouncer
+#   when: cs_bouncers is defined and ansible_os_family == 'Debian'
+#   tags:
+#     - bouncers
 
 - name: Install bouncers (RedHat)
   ansible.builtin.include_tasks: install_bouncers_rhel.yml
