@@ -1,7 +1,6 @@
-# Ansible role "papanito.crowdsec" <!-- omit in toc -->
+# jpartain89.crowdsec
 
-[![Ansible Role](https://img.shields.io/ansible/role/57402)](https://galaxy.ansible.com/papanito/cloudflared) [![Ansible Quality Score](https://img.shields.io/ansible/quality/57402)](https://galaxy.ansible.com/papanito/cloudflared) [![Ansible Role](https://img.shields.io/ansible/role/d/57402)](https://galaxy.ansible.com/papanito/cloudflared) [![GitHub issues](https://img.shields.io/github/issues/papanito/ansible-role-crowdsec)](https://github.com/papanito/ansible-role-crowdsec/issues) [![GitHub pull requests](https://img.shields.io/github/issues-pr/papanito/ansible-role-crowdsec)](https://github.com/papanito/ansible-role-crowdsec/pulls)
-
+## Purpose
 
 Ansible role to install [crowdsec][crowdsec-git] or specifically the [crowdsec-agent][crowdsec-git] and [bouncers][crowdsec-hub]
 
@@ -69,13 +68,20 @@ If your are missing something, please check the open issues and create one if ne
 
 n/a
 
-## Testing
+## Molecule tests
 
-I use [Hetzner Cloud](https://console.hetzner.cloud) for testing hence you can use this play
+This role includes a `molecule/default` scenario for smoke-testing the role.
+
+### To run locally:
 
 ```bash
-ansible-playbook tests/test.install.both.yml -e cs_console_token=XXXX
+pipenv install --dev
+pipenv shell
+cd personal_ansible_plays/roles/jpartain89.crowdsec
+molecule test --scenario-name default
 ```
+
+The converge play is conservative by default; inspect `molecule/default/converge.yml` before enabling crowdsec agent installation or bouncer deployment.
 
 For this to work, export `HCLOUD_TOKEN`.
 
