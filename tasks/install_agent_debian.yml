@@ -1,4 +1,11 @@
 ---
+# python3-debian is required by the deb822_repository module
+- name: Crowdsec | install_agent_debian | Ensure python3-debian is present
+  ansible.builtin.apt:
+    name: python3-debian
+    state: present
+    update_cache: true
+
 - name: Crowdsec | install_agent_debian | Add CrowdSec repository
   ansible.builtin.deb822_repository:
     name: crowdsec

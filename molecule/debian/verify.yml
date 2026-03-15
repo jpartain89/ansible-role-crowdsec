@@ -1,38 +1,98 @@
 ---
+# Full-install verify for Debian / Ubuntu.
+# Asserts every observable outcome of running the role with cs_install_agent=true.
 - name: Crowdsec | debian | Verify
   hosts: all
   gather_facts: true
   tasks:
-    - name: Crowdsec | verify | Gather Package Facts
+    # -------------------------------------------------------------------
+    # Package installation
+    # -------------------------------------------------------------------
+    - name: Crowdsec | verify | Gather apt package facts
       ansible.builtin.package_facts:
         manager: apt
 
-    - name: Crowdsec | verify | Assert CrowdSec Package Is Installed
+    - name: Crowdsec | verify | Assert crowdsec package is installed
       ansible.builtin.assert:
         that:
           - '"crowdsec" in ansible_facts.packages'
-        fail_msg: 'crowdsec package is not installed'
+        fail_msg: 'crowdsec package is not installed via apt'
         success_msg: 'crowdsec package is installed'
 
-    - name: Crowdsec | verify | Stat /etc/crowdsec Config Directory
+    - name: Crowdsec | verify | Assert crowdsec-firewall-bouncer-iptables package is installed
+      ansible.builtin.assert:
+        that:
+          - '"crowdsec-firewall-bouncer-iptables" in ansible_facts.packages'
+        fail_msg: 'crowdsec-firewall-bouncer-iptables package is not installed'
+        success_msg: 'crowdsec-firewall-bouncer-iptables package is installed'
+
+    # -------------------------------------------------------------------
+    # APT repository
+    # -------------------------------------------------------------------
+    - name: Crowdsec | verify | Stat CrowdSec apt repository sources file
+      ansible.builtin.stat:
+        path: /etc/apt/sources.list.d/crowdsec.sources
+      register: crowdsec_repo_file
+
+    - name: Crowdsec | verify | Assert CrowdSec apt repository file is present
+      ansible.builtin.assert:
+        that:
+          - crowdsec_repo_file.stat.exists
+          - crowdsec_repo_file.stat.isreg
+        fail_msg: '/etc/apt/sources.list.d/crowdsec.sources is missing'
+        success_msg: 'CrowdSec apt repository file exists'
+
+    # -------------------------------------------------------------------
+    # Configuration directory and key files
+    # -------------------------------------------------------------------
+    - name: Crowdsec | verify | Stat /etc/crowdsec config directory
       ansible.builtin.stat:
         path: /etc/crowdsec
       register: crowdsec_config_dir
 
-    - name: Crowdsec | verify | Assert /etc/crowdsec Config Directory Exists
+    - name: Crowdsec | verify | Assert /etc/crowdsec directory exists
       ansible.builtin.assert:
         that:
           - crowdsec_config_dir.stat.exists
           - crowdsec_config_dir.stat.isdir
-        fail_msg: '/etc/crowdsec directory does not exist'
+        fail_msg: '/etc/crowdsec directory does not exist after installation'
         success_msg: '/etc/crowdsec directory exists'
 
-    - name: Crowdsec | verify | Stat cscli Binary
+    - name: Crowdsec | verify | Stat /etc/crowdsec/config.yaml
+      ansible.builtin.stat:
+        path: /etc/crowdsec/config.yaml
+      register: crowdsec_config_yaml
+
+    - name: Crowdsec | verify | Assert /etc/crowdsec/config.yaml is present
+      ansible.builtin.assert:
+        that:
+          - crowdsec_config_yaml.stat.exists
+          - crowdsec_config_yaml.stat.isreg
+        fail_msg: '/etc/crowdsec/config.yaml is missing after installation'
+        success_msg: '/etc/crowdsec/config.yaml exists'
+
+    # -------------------------------------------------------------------
+    # Binaries
+    # -------------------------------------------------------------------
+    - name: Crowdsec | verify | Stat /usr/bin/crowdsec binary
+      ansible.builtin.stat:
+        path: /usr/bin/crowdsec
+      register: crowdsec_bin
+
+    - name: Crowdsec | verify | Assert /usr/bin/crowdsec is present and executable
+      ansible.builtin.assert:
+        that:
+          - crowdsec_bin.stat.exists
+          - crowdsec_bin.stat.executable
+        fail_msg: '/usr/bin/crowdsec binary is missing or not executable'
+        success_msg: '/usr/bin/crowdsec binary is present and executable'
+
+    - name: Crowdsec | verify | Stat /usr/bin/cscli binary
       ansible.builtin.stat:
         path: /usr/bin/cscli
       register: cscli_bin
 
-    - name: Crowdsec | verify | Assert cscli Binary Is Present and Executable
+    - name: Crowdsec | verify | Assert /usr/bin/cscli is present and executable
       ansible.builtin.assert:
         that:
           - cscli_bin.stat.exists
@@ -40,12 +100,22 @@
         fail_msg: '/usr/bin/cscli binary is missing or not executable'
         success_msg: '/usr/bin/cscli binary is present and executable'
 
-    - name: Crowdsec | verify | Gather Service Facts
+    # -------------------------------------------------------------------
+    # Systemd service
+    # -------------------------------------------------------------------
+    - name: Crowdsec | verify | Gather service facts
       ansible.builtin.service_facts:
 
-    - name: Crowdsec | verify | Assert CrowdSec Service Is Present
+    - name: Crowdsec | verify | Assert crowdsec service is registered in systemd
       ansible.builtin.assert:
         that:
           - '"crowdsec.service" in ansible_facts.services'
-        fail_msg: 'crowdsec.service is not found in systemd'
+        fail_msg: 'crowdsec.service is not registered in systemd after installation'
         success_msg: 'crowdsec.service is registered in systemd'
+
+    - name: Crowdsec | verify | Assert crowdsec service is enabled
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services['crowdsec.service']['status'] == 'enabled'
+        fail_msg: 'crowdsec.service is not enabled'
+        success_msg: 'crowdsec.service is enabled'

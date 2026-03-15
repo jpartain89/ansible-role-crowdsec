@@ -1,4 +1,4 @@
-- name: Install bouncer {{ cs_bouncer.key }}
+- name: Crowdsec | install_bouncers_rhel | Install bouncer {{ cs_bouncer.key }}
   ansible.builtin.dnf:
     name: "{{ cs_bouncers_official[cs_bouncer.key].deb }}"
     state: present

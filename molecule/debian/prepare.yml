@@ -1,0 +1,18 @@
+---
+# Prepare the container before converge.
+# python3-debian is required by ansible.builtin.deb822_repository.
+# Refreshing the apt cache here prevents stale-cache failures during converge.
+- name: Crowdsec | debian | Prepare
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Crowdsec | prepare | Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 0
+
+    - name: Crowdsec | prepare | Ensure python3-debian is present
+      ansible.builtin.apt:
+        name: python3-debian
+        state: present

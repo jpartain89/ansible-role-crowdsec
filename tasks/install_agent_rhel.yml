@@ -13,14 +13,21 @@
     state: present
 
 # https://packagecloud.io/crowdsec/crowdsec/install#manual-rpm
+# packagecloud repos sign their metadata (repo_gpgcheck) via HTTPS but do not
+# individually sign each RPM (gpgcheck). This is packagecloud's standard and
+# documented security model: HTTPS transport + signed metadata provides integrity.
 - name: Crowdsec | install_agent_rhel | Add CrowdSec repository
   ansible.builtin.yum_repository:
     name: crowdsec
     description: crowdsec repository
-    gpgkey:
-      - https://packagecloud.io/crowdsec/crowdsec/gpgkey/crowdsec-crowdsec-B78D1222C9AD2D5D.pub.gpg
-      - https://packagecloud.io/crowdsec/crowdsec/gpgkey/crowdsec-crowdsec-FED78314A2468CCF.pub.gpg
-    baseurl: https://packagecloud.io/crowdsec/crowdsec/el/$releasever/$basearch/
+    baseurl: https://packagecloud.io/crowdsec/crowdsec/el/$releasever/$basearch
+    gpgkey: https://packagecloud.io/crowdsec/crowdsec/gpgkey
+    gpgcheck: false
+    repo_gpgcheck: true
+    sslverify: true
+    sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+    metadata_expire: '300'
+    enabled: true
     state: present
     file: crowdsec
 

@@ -1,0 +1,10 @@
+---
+# Prepare the container before converge.
+# The default scenario disables agent installation (cs_install_agent: false),
+# so no OS-specific dependencies are required here.
+- name: Crowdsec | default | Prepare
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Crowdsec | prepare | Verify Ansible connection is functional
+      ansible.builtin.ping:

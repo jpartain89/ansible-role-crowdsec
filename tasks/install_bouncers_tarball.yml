@@ -1,9 +1,9 @@
-# - name: "Check if bouncer {{ cs_bouncer }} is installed"
+# - name: Crowdsec | install_bouncers_tarball | Check if bouncer {{ cs_bouncer }} is installed
 #   ansible.builtin.stat:
 #     path: "{{ cs_install_dir_bouncer }}/{{ cs_bouncer }}"
 #   register: bouncer_stat
 
-# - name: Check if crowdsec agent is installed and return version
+# - name: Crowdsec | install_bouncers_tarball | Check if CrowdSec agent is installed and return version
 #   ansible.utils.cli_parse:
 #     command: crowdsec -version
 #     parser:
@@ -12,6 +12,6 @@
 #     set_fact: crowdsec_version
 #   when: bouncer_stat.stat.exists
 
-- name: Install bouncer {{ cs_bouncer }} (tarball)
+- name: Crowdsec | install_bouncers_tarball | Install bouncer {{ cs_bouncer }} (tarball)
   ansible.builtin.debug:
     msg: "TBD"

@@ -1,28 +1,70 @@
 ---
+# Smoke-test verify: cs_install_agent=false — nothing should be installed.
+# Runs on all supported platforms (Debian, Ubuntu, Rocky Linux).
 - name: Crowdsec | default | Verify
   hosts: all
-  gather_facts: false
+  gather_facts: true
   tasks:
-    - name: Crowdsec | verify | Stat /etc/hosts
-      ansible.builtin.stat:
-        path: /etc/hosts
-      register: hosts_file_stat
+    - name: Crowdsec | verify | Confirm Ansible connection is functional
+      ansible.builtin.ping:
 
-    - name: Crowdsec | verify | Assert /etc/hosts Is Present
+    # -------------------------------------------------------------------
+    # Binaries must NOT exist
+    # -------------------------------------------------------------------
+    - name: Crowdsec | verify | Stat /usr/bin/crowdsec
+      ansible.builtin.stat:
+        path: /usr/bin/crowdsec
+      register: crowdsec_bin
+
+    - name: Crowdsec | verify | Assert crowdsec binary is absent
       ansible.builtin.assert:
         that:
-          - hosts_file_stat.stat.exists
-        fail_msg: '/etc/hosts does not exist'
-        success_msg: '/etc/hosts exists'
+          - not crowdsec_bin.stat.exists
+        fail_msg: >-
+          /usr/bin/crowdsec exists but cs_install_agent was false —
+          agent installation should not have occurred
+        success_msg: '/usr/bin/crowdsec is absent as expected (cs_install_agent=false)'
 
-    - name: Crowdsec | verify | Stat /etc/crowdsec Config Directory
+    - name: Crowdsec | verify | Stat /usr/bin/cscli
+      ansible.builtin.stat:
+        path: /usr/bin/cscli
+      register: cscli_bin
+
+    - name: Crowdsec | verify | Assert cscli binary is absent
+      ansible.builtin.assert:
+        that:
+          - not cscli_bin.stat.exists
+        fail_msg: >-
+          /usr/bin/cscli exists but cs_install_agent was false
+        success_msg: '/usr/bin/cscli is absent as expected (cs_install_agent=false)'
+
+    # -------------------------------------------------------------------
+    # Config directory must NOT exist
+    # -------------------------------------------------------------------
+    - name: Crowdsec | verify | Stat /etc/crowdsec config directory
       ansible.builtin.stat:
         path: /etc/crowdsec
       register: crowdsec_config_dir
 
-    - name: Crowdsec | verify | Assert /etc/crowdsec Absent When Agent Not Installed
+    - name: Crowdsec | verify | Assert /etc/crowdsec is absent
       ansible.builtin.assert:
         that:
           - not crowdsec_config_dir.stat.exists
-        fail_msg: '/etc/crowdsec exists but agent installation was disabled'
-        success_msg: '/etc/crowdsec absent as expected when cs_install_agent=false'
+        fail_msg: >-
+          /etc/crowdsec exists but cs_install_agent was false —
+          no configuration should have been written
+        success_msg: '/etc/crowdsec is absent as expected (cs_install_agent=false)'
+
+    # -------------------------------------------------------------------
+    # Service must NOT be registered
+    # -------------------------------------------------------------------
+    - name: Crowdsec | verify | Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Crowdsec | verify | Assert crowdsec service is not registered
+      ansible.builtin.assert:
+        that:
+          - '"crowdsec.service" not in ansible_facts.services'
+        fail_msg: >-
+          crowdsec.service is registered in systemd but cs_install_agent was false
+        success_msg: 'crowdsec.service is absent as expected (cs_install_agent=false)'
