@@ -1,0 +1,6 @@
+---
+- name: crowdsec | rhel | Converge
+  hosts: all
+  roles:
+    - role: jpartain89.crowdsec
+      cs_install_agent: true

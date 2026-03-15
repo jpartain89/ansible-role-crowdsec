@@ -3,12 +3,14 @@ name: main and pr builds
 on:
   push:
     branches:
-    - master
-    - main
+      - master
+      - main
+      - dev
   pull_request:
     branches:
-    - master
-    - main
+      - master
+      - main
+      - dev
   workflow_dispatch:
 
 jobs:

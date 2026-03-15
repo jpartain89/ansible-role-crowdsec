@@ -1,0 +1,51 @@
+---
+- name: crowdsec | rhel | Verify
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: crowdsec | verify | Gather Package Facts
+      ansible.builtin.package_facts:
+        manager: rpm
+
+    - name: crowdsec | verify | Assert CrowdSec Package Is Installed
+      ansible.builtin.assert:
+        that:
+          - '"crowdsec" in ansible_facts.packages'
+        fail_msg: 'crowdsec package is not installed'
+        success_msg: 'crowdsec package is installed'
+
+    - name: crowdsec | verify | Stat /etc/crowdsec Config Directory
+      ansible.builtin.stat:
+        path: /etc/crowdsec
+      register: crowdsec_config_dir
+
+    - name: crowdsec | verify | Assert /etc/crowdsec Config Directory Exists
+      ansible.builtin.assert:
+        that:
+          - crowdsec_config_dir.stat.exists
+          - crowdsec_config_dir.stat.isdir
+        fail_msg: '/etc/crowdsec directory does not exist'
+        success_msg: '/etc/crowdsec directory exists'
+
+    - name: crowdsec | verify | Stat cscli Binary
+      ansible.builtin.stat:
+        path: /usr/bin/cscli
+      register: cscli_bin
+
+    - name: crowdsec | verify | Assert cscli Binary Is Present and Executable
+      ansible.builtin.assert:
+        that:
+          - cscli_bin.stat.exists
+          - cscli_bin.stat.executable
+        fail_msg: '/usr/bin/cscli binary is missing or not executable'
+        success_msg: '/usr/bin/cscli binary is present and executable'
+
+    - name: crowdsec | verify | Gather Service Facts
+      ansible.builtin.service_facts:
+
+    - name: crowdsec | verify | Assert CrowdSec Service Is Present
+      ansible.builtin.assert:
+        that:
+          - '"crowdsec.service" in ansible_facts.services'
+        fail_msg: 'crowdsec.service is not found in systemd'
+        success_msg: 'crowdsec.service is registered in systemd'
