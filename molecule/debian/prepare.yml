@@ -2,10 +2,10 @@
 # Prepare the container before converge.
 # python3-debian is required by ansible.builtin.deb822_repository.
 # Refreshing the apt cache here prevents stale-cache failures during converge.
+# Note: geerlingguy/docker-*-ansible containers connect as root — no become needed.
 - name: Crowdsec | debian | Prepare
   hosts: all
   gather_facts: false
-  become: true
   tasks:
     - name: Crowdsec | prepare | Update apt cache
       ansible.builtin.apt:

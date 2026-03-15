@@ -1,7 +1,6 @@
 ---
 - name: Crowdsec | default | Converge
   hosts: all
-  become: true
   roles:
     - role: jpartain89.crowdsec
       cs_install_agent: false
