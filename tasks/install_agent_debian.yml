@@ -1,5 +1,5 @@
 ---
-- name: crowdsec | install_agent_debian | Add CrowdSec repository
+- name: Crowdsec | install_agent_debian | Add CrowdSec repository
   ansible.builtin.deb822_repository:
     name: crowdsec
     types:
@@ -12,7 +12,7 @@
     state: present
     enabled: true
 
-- name: crowdsec | install_agent_debian | Install CrowdSec agent
+- name: Crowdsec | install_agent_debian | Install CrowdSec agent
   ansible.builtin.apt:
     name:
       - crowdsec
@@ -20,15 +20,15 @@
     state: present
     update_cache: true
 
-- name: crowdsec | install_agent_debian | Install Cloudflare bouncer
+- name: Crowdsec | install_agent_debian | Install Cloudflare bouncer
   ansible.builtin.apt:
     name: crowdsec-cloudflare-bouncer
     state: present
     update_cache: false
-  when: crowdesc_CF_TOKEN | length > 0
+  when: crowdsec_cf_token | length > 0
 
-- name: crowdsec | install_agent_debian | Configure Cloudflare bouncer
+- name: Crowdsec | install_agent_debian | Configure Cloudflare bouncer
   ansible.builtin.command:
-    cmd: 'crowdsec-cloudflare-bouncer -g {{ crowdesc_CF_TOKEN }} -o /etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml'
+    cmd: 'crowdsec-cloudflare-bouncer -g {{ crowdsec_cf_token }} -o /etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml'
     creates: /etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml
-  when: crowdesc_CF_TOKEN | length > 0
+  when: crowdsec_cf_token | length > 0

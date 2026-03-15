@@ -1,5 +1,5 @@
 ---
-- name: crowdsec | rhel | Converge
+- name: Crowdsec | rhel | Converge
   hosts: all
   roles:
     - role: jpartain89.crowdsec

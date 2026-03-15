@@ -1,26 +1,26 @@
 ---
-- name: crowdsec | default | Verify
+- name: Crowdsec | default | Verify
   hosts: all
   gather_facts: false
   tasks:
-    - name: crowdsec | verify | Stat /etc/hosts
+    - name: Crowdsec | verify | Stat /etc/hosts
       ansible.builtin.stat:
         path: /etc/hosts
       register: hosts_file_stat
 
-    - name: crowdsec | verify | Assert /etc/hosts Is Present
+    - name: Crowdsec | verify | Assert /etc/hosts Is Present
       ansible.builtin.assert:
         that:
           - hosts_file_stat.stat.exists
         fail_msg: '/etc/hosts does not exist'
         success_msg: '/etc/hosts exists'
 
-    - name: crowdsec | verify | Stat /etc/crowdsec Config Directory
+    - name: Crowdsec | verify | Stat /etc/crowdsec Config Directory
       ansible.builtin.stat:
         path: /etc/crowdsec
       register: crowdsec_config_dir
 
-    - name: crowdsec | verify | Assert /etc/crowdsec Absent When Agent Not Installed
+    - name: Crowdsec | verify | Assert /etc/crowdsec Absent When Agent Not Installed
       ansible.builtin.assert:
         that:
           - not crowdsec_config_dir.stat.exists

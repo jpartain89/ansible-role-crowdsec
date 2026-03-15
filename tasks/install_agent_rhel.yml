@@ -1,19 +1,19 @@
 ---
 # EPEL is available via standard repos on modern RHEL/Rocky 8+ if needed.
-# - name: crowdsec | install_agent_rhel | Enable EPEL Repository on Rocky/CentOS 8
+# - name: Crowdsec | install_agent_rhel | Enable EPEL Repository on Rocky/CentOS 8
 #   ansible.builtin.dnf:
 #     name: epel-release
 #     state: present
 #   when: ansible_facts['distribution_major_version'] == '8'
 
-- name: crowdsec | install_agent_rhel | Install required packages
+- name: Crowdsec | install_agent_rhel | Install required packages
   ansible.builtin.dnf:
     name:
       - yum-utils
     state: present
 
 # https://packagecloud.io/crowdsec/crowdsec/install#manual-rpm
-- name: crowdsec | install_agent_rhel | Add CrowdSec repository
+- name: Crowdsec | install_agent_rhel | Add CrowdSec repository
   ansible.builtin.yum_repository:
     name: crowdsec
     description: crowdsec repository
@@ -24,7 +24,7 @@
     state: present
     file: crowdsec
 
-- name: crowdsec | install_agent_rhel | Install CrowdSec agent
+- name: Crowdsec | install_agent_rhel | Install CrowdSec agent
   ansible.builtin.dnf:
     name: crowdsec
     state: present
