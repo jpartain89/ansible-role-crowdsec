@@ -1,5 +1,5 @@
 ---
-- name: Converge
+- name: Crowdsec | default | Converge
   hosts: all
   roles:
     - role: jpartain89.crowdsec

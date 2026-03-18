@@ -1,0 +1,31 @@
+---
+# Prepare the container before converge.
+# python3-debian is required by ansible.builtin.deb822_repository.
+# policy-rc.d prevents dpkg post-install scripts from starting services via
+# invoke-rc.d (standard on Debian/Ubuntu containers). Without it the crowdsec
+# and crowdsec-firewall-bouncer-iptables post-install scripts fail on Ubuntu
+# 24.04 because the service-start invocation exits non-zero inside the
+# container environment. deb-systemd-helper enable is unaffected, so the
+# service is still marked enabled and verify assertions pass.
+# Note: geerlingguy/docker-*-ansible containers connect as root — no become needed.
+- name: Crowdsec | debian | Prepare
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Crowdsec | prepare | Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 0
+
+    - name: Crowdsec | prepare | Ensure python3-debian is present
+      ansible.builtin.apt:
+        name: python3-debian
+        state: present
+
+    - name: Crowdsec | prepare | Prevent package post-install scripts from starting services
+      ansible.builtin.copy:
+        content: |
+          #!/bin/sh
+          exit 101
+        dest: /usr/sbin/policy-rc.d
+        mode: '0755'

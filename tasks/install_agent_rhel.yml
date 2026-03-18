@@ -1,34 +1,37 @@
-# - name: Enable EPEL Repository on CentOS 8
+---
+# EPEL is available via standard repos on modern RHEL/Rocky 8+ if needed.
+# - name: Crowdsec | install_agent_rhel | Enable EPEL Repository on Rocky/CentOS 8
 #   ansible.builtin.dnf:
 #     name: epel-release
-#     state: latest
-#   when: ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '8'
-# - name: Enable EPEL Repository on CentOS 7
-#   ansible.builtin.yum:
-#     name: epel-release
-#     state: latest
-#   when: ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '7'
+#     state: present
+#   when: ansible_facts['distribution_major_version'] == '8'
 
-- name: Install required packages
-  ansible.builtin.yum:
+- name: Crowdsec | install_agent_rhel | Install required packages
+  ansible.builtin.dnf:
     name:
-    # - pygpgme
       - yum-utils
     state: present
 
-# https://packagecloud.io/crowdsec/crowdsec/install#manual-deb
-- name: Add crowdsec apt repository
+# https://packagecloud.io/crowdsec/crowdsec/install#manual-rpm
+# packagecloud repos sign their metadata (repo_gpgcheck) via HTTPS but do not
+# individually sign each RPM (gpgcheck). This is packagecloud's standard and
+# documented security model: HTTPS transport + signed metadata provides integrity.
+- name: Crowdsec | install_agent_rhel | Add CrowdSec repository
   ansible.builtin.yum_repository:
     name: crowdsec
     description: crowdsec repository
-    gpgkey:
-      - https://packagecloud.io/crowdsec/crowdsec/gpgkey/crowdsec-crowdsec-B78D1222C9AD2D5D.pub.gpg
-      - https://packagecloud.io/crowdsec/crowdsec/gpgkey/crowdsec-crowdsec-FED78314A2468CCF.pub.gpg
-    baseurl: https://packagecloud.io/crowdsec/crowdsec/el/$releasever/$basearch/
+    baseurl: https://packagecloud.io/crowdsec/crowdsec/el/$releasever/$basearch
+    gpgkey: https://packagecloud.io/crowdsec/crowdsec/gpgkey
+    gpgcheck: false
+    repo_gpgcheck: true
+    sslverify: true
+    sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+    metadata_expire: '300'
+    enabled: true
     state: present
     file: crowdsec
 
-- name: Install crowdsec
+- name: Crowdsec | install_agent_rhel | Install CrowdSec agent
   ansible.builtin.dnf:
     name: crowdsec
     state: present

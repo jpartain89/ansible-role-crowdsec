@@ -68,22 +68,54 @@ If your are missing something, please check the open issues and create one if ne
 
 n/a
 
-## Molecule tests
+## Molecule Tests
 
-This role includes a `molecule/default` scenario for smoke-testing the role.
+This role ships three molecule scenarios, all using [geerlingguy's systemd-enabled Docker images][geerlingguy-images]:
 
-### To run locally:
+| Scenario  | Purpose                                              | Platforms                              |
+| --------- | ---------------------------------------------------- | -------------------------------------- |
+| `default` | Smoke test – role runs without errors (`cs_install_agent: false`) | Debian 12, Ubuntu 22.04, Ubuntu 24.04, Rocky Linux 9 |
+| `debian`  | Full installation test for Debian-family systems     | Debian 12, Ubuntu 22.04, Ubuntu 24.04  |
+| `rhel`    | Full installation test for RHEL-family systems       | Rocky Linux 9                          |
+
+### Prerequisites
+
+Python 3.12+, Docker, and the pinned testing dependencies:
 
 ```bash
-pipenv install --dev
-pipenv shell
-cd personal_ansible_plays/roles/jpartain89.crowdsec
-molecule test --scenario-name default
+pip install -r requirements.txt
 ```
 
-The converge play is conservative by default; inspect `molecule/default/converge.yml` before enabling crowdsec agent installation or bouncer deployment.
+### Running locally
 
-For this to work, export `HCLOUD_TOKEN`.
+```bash
+# From the role root (e.g. personal_ansible_plays/roles/jpartain89.crowdsec)
+
+# Smoke test on Debian 12 (default)
+molecule test --scenario-name default
+
+# Full install test on Ubuntu 22.04
+MOLECULE_DISTRO=ubuntu2204 molecule test --scenario-name debian
+
+# Full install test on Rocky Linux 9
+molecule test --scenario-name rhel
+```
+
+### CI/CD
+
+Molecule tests run automatically in GitHub Actions on every pull request and push to `main`, `master`, or `dev`. See [`.github/workflows/molecule.yml`](.github/workflows/molecule.yml) for the full matrix configuration.
+
+**Testing toolchain versions (pinned in `requirements.txt`):**
+
+| Package            | Version  |
+| ------------------ | -------- |
+| ansible            | 13.4.0   |
+| ansible-lint       | 26.3.0   |
+| molecule           | 26.3.0   |
+| molecule-plugins   | 25.8.12  |
+| docker (SDK)       | 7.1.0    |
+
+[geerlingguy-images]: https://github.com/geerlingguy/docker-*-ansible
 
 ## Example Playbook
 

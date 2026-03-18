@@ -1,31 +1,31 @@
 ---
 # tasks file for papanito.crowdsec
 
-- name: Install crowdsec agent (Debian)
+- name: Crowdsec | main | Install CrowdSec agent (Debian)
   ansible.builtin.import_tasks: install_agent_debian.yml
-  when: cs_install_agent|bool and ansible_os_family == 'Debian'
+  when: cs_install_agent | bool and ansible_os_family == 'Debian'
   tags:
     - agent
 
-- name: Install crowdsec agent (Enterprise Linux)
+- name: Crowdsec | main | Install CrowdSec agent (Enterprise Linux)
   ansible.builtin.import_tasks: install_agent_rhel.yml
-  when: cs_install_agent|bool and ansible_os_family == 'RedHat'
+  when: cs_install_agent | bool and ansible_os_family == 'RedHat'
   tags:
     - agent
 
-- name: Install crowdsec agent (tarball)
+- name: Crowdsec | main | Install CrowdSec agent (tarball)
   ansible.builtin.import_tasks: install_agent_tarball.yml
-  when: cs_install_agent|bool and ansible_os_family != 'Debian' and ansible_os_family != 'RedHat'
+  when: cs_install_agent | bool and ansible_os_family != 'Debian' and ansible_os_family != 'RedHat'
   tags:
     - agent
 
-- name: Enroll instance to console
+- name: Crowdsec | main | Enroll instance to CrowdSec console
   ansible.builtin.command: "cscli console enroll {{ cs_console_token }}"
   when: cs_console_token is defined
   tags:
     - console
 
-# - name: Install bouncers (Debian)
+# - name: Crowdsec | main | Install bouncers (Debian)
 #   ansible.builtin.include_tasks: install_bouncers_debian.yml
 #   loop: "{{ cs_bouncers | dict2items }}"
 #   loop_control:
@@ -34,7 +34,7 @@
 #   tags:
 #     - bouncers
 
-- name: Install bouncers (RedHat)
+- name: Crowdsec | main | Install bouncers (RedHat)
   ansible.builtin.include_tasks: install_bouncers_rhel.yml
   loop: "{{ cs_bouncers | dict2items }}"
   loop_control:
@@ -43,7 +43,7 @@
   tags:
     - bouncers
 
-- name: Install bouncers (tarball)
+- name: Crowdsec | main | Install bouncers (tarball)
   ansible.builtin.include_tasks: install_bouncers_tarball.yml
   loop: "{{ cs_bouncers | dict2items }}"
   loop_control:

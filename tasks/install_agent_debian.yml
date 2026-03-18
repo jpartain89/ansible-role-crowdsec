@@ -1,4 +1,12 @@
-- name: Add crowdsec key and repo
+---
+# python3-debian is required by the deb822_repository module
+- name: Crowdsec | install_agent_debian | Ensure python3-debian is present
+  ansible.builtin.apt:
+    name: python3-debian
+    state: present
+    update_cache: true
+
+- name: Crowdsec | install_agent_debian | Add CrowdSec repository
   ansible.builtin.deb822_repository:
     name: crowdsec
     types:
@@ -11,22 +19,23 @@
     state: present
     enabled: true
 
-- name: Install crowdsec
+- name: Crowdsec | install_agent_debian | Install CrowdSec agent
   ansible.builtin.apt:
-    name: "{{ item }}"
+    name:
+      - crowdsec
+      - crowdsec-firewall-bouncer-iptables
     state: present
     update_cache: true
-  with_items:
-    - crowdsec
-    - crowdsec-firewall-bouncer-iptables
-    - crowdsec-cloudflare-bouncer
 
-#- name: register remediation components
-#  ansible.builtin.command:
-#    cmd: sudo cscli bouncers add crowdsec-firewall-bouncer-iptables
-#  register: _crowdsec-firewall-bouncer-iptables_api_key
+- name: Crowdsec | install_agent_debian | Install Cloudflare bouncer
+  ansible.builtin.apt:
+    name: crowdsec-cloudflare-bouncer
+    state: present
+    update_cache: false
+  when: crowdsec_cf_token | length > 0
 
-
-- name: Configure Cloudflare bouncer
+- name: Crowdsec | install_agent_debian | Configure Cloudflare bouncer
   ansible.builtin.command:
-    cmd: sudo crowdsec-cloudflare-bouncer -g {{ crowdesc_CF_TOKEN }} -o /etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml
+    cmd: 'crowdsec-cloudflare-bouncer -g {{ crowdsec_cf_token }} -o /etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml'
+    creates: /etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml
+  when: crowdsec_cf_token | length > 0

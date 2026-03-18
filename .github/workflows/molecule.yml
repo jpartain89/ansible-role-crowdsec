@@ -1,32 +1,100 @@
 ---
-name: Molecule
+name: Molecule Tests
 
 on:
   push:
     branches:
       - main
       - master
+      - dev
   pull_request:
+    branches:
+      - main
+      - master
+      - dev
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  molecule:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          path: jpartain89.crowdsec
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: jpartain89.crowdsec/requirements.txt
+
+      - name: Install lint dependencies
+        run: pip install ansible-lint==26.3.0 ansible==13.4.0
+
+      - name: Run ansible-lint
+        working-directory: jpartain89.crowdsec
+        env:
+          ANSIBLE_ROLES_PATH: '..'
+        run: ansible-lint
+
+  molecule:
+    name: Molecule | ${{ matrix.scenario }} | ${{ matrix.distro }}
+    runs-on: ubuntu-latest
+    needs: lint
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Smoke-test (no agent install) across all supported platforms
+          - scenario: default
+            distro: debian12
+          - scenario: default
+            distro: ubuntu2204
+          - scenario: default
+            distro: ubuntu2404
+          - scenario: default
+            distro: rockylinux9
+          # Full Debian-family installation tests
+          - scenario: debian
+            distro: debian12
+          - scenario: debian
+            distro: ubuntu2204
+          - scenario: debian
+            distro: ubuntu2404
+          # Full RHEL-family installation test
+          - scenario: rhel
+            distro: rockylinux9
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: jpartain89.crowdsec
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: jpartain89.crowdsec/requirements.txt
 
       - name: Install test dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install ansible ansible-lint molecule molecule-docker docker testinfra
+        run: pip install -r jpartain89.crowdsec/requirements.txt
 
       - name: Run Molecule
-        run: molecule test --scenario-name default
+        working-directory: jpartain89.crowdsec
+        env:
+          MOLECULE_DISTRO: ${{ matrix.distro }}
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+        run: molecule test --scenario-name ${{ matrix.scenario }}

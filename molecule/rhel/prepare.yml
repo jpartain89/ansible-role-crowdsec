@@ -1,0 +1,17 @@
+---
+# Prepare the container before converge.
+# Refresh the dnf cache and ensure yum-utils is available so the
+# yum_repository module can successfully import the CrowdSec GPG key.
+# Note: geerlingguy/docker-*-ansible containers connect as root — no become needed.
+- name: Crowdsec | rhel | Prepare
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Crowdsec | prepare | Update dnf cache
+      ansible.builtin.dnf:
+        update_cache: true
+
+    - name: Crowdsec | prepare | Ensure yum-utils is present
+      ansible.builtin.dnf:
+        name: yum-utils
+        state: present
