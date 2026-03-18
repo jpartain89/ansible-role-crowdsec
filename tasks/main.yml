@@ -3,19 +3,19 @@
 
 - name: Crowdsec | main | Install CrowdSec agent (Debian)
   ansible.builtin.import_tasks: install_agent_debian.yml
-  when: cs_install_agent|bool and ansible_os_family == 'Debian'
+  when: cs_install_agent | bool and ansible_os_family == 'Debian'
   tags:
     - agent
 
 - name: Crowdsec | main | Install CrowdSec agent (Enterprise Linux)
   ansible.builtin.import_tasks: install_agent_rhel.yml
-  when: cs_install_agent|bool and ansible_os_family == 'RedHat'
+  when: cs_install_agent | bool and ansible_os_family == 'RedHat'
   tags:
     - agent
 
 - name: Crowdsec | main | Install CrowdSec agent (tarball)
   ansible.builtin.import_tasks: install_agent_tarball.yml
-  when: cs_install_agent|bool and ansible_os_family != 'Debian' and ansible_os_family != 'RedHat'
+  when: cs_install_agent | bool and ansible_os_family != 'Debian' and ansible_os_family != 'RedHat'
   tags:
     - agent
 
