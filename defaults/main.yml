@@ -7,7 +7,6 @@ cs_install_target_dir: /var/tmp
 cs_config_file_base: /etc/crowdsec
 cs_install_dir_agent: /usr/local/bin/
 cs_install_dir_bouncer: /usr/local/bin
-
 ## configuration for default bouncers
 cs_bouncers_official:
   cs-firewall-bouncer:

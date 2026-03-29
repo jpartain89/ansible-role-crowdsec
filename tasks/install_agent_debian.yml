@@ -19,13 +19,19 @@
     state: present
     enabled: true
 
-- name: Crowdsec | install_agent_debian | Install CrowdSec agent
+- name: Crowdsec | install_agent_debian | Install main CrowdSec Daemon
   ansible.builtin.apt:
     name:
       - crowdsec
-      - crowdsec-firewall-bouncer-iptables
     state: present
     update_cache: true
+
+- name: Crowdesc | install_agent_debian | Install CrowdSec Firewall Bouncer
+  ansible.builtin.apt:
+    name: crowdsec-firewall-bouncer-nftables
+    state: present
+    update_cache: false
+  when: "'firewall' in cs_bouncers_enabled"
 
 - name: Crowdsec | install_agent_debian | Install Cloudflare bouncer
   ansible.builtin.apt:
