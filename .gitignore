@@ -1,0 +1,12 @@
+# Ansible local cache (created by ansible-lint / ansible-galaxy)
+.ansible/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Molecule ephemeral directories
+molecule/**/.cache/
